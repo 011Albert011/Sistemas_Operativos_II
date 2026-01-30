@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StyleHub - Iniciar Sesión</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="login-styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="index.html" style="color: white; text-decoration: none;">
+                        <h1>StyleHub</h1>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Login Container -->
+    <div class="login-page">
+        <div class="login-container">
+            <div class="login-box">
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('login')">Iniciar Sesión</button>
+                    <button class="tab-btn" onclick="switchTab('signup')">Registrarse</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="loginForm" class="auth-form active" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" placeholder="tu@email.com" required>
+                        <span class="input-icon">📧</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Contraseña</label>
+                        <input type="password" id="password" name="password" placeholder="••••••••" required>
+                        <span class="input-icon">🔒</span>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox">
+                            <input type="checkbox">
+                            <span>Recuérdame</span>
+                        </label>
+                        <a href="#" class="forgot-password">¿Olvidaste la contraseña?</a>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Iniciar Sesión</button>
+
+                    <div class="divider">o continúa con</div>
+
+                    <div class="social-login">
+                        <button type="button" class="social-btn google-btn">
+                            <span>🔵</span> Google
+                        </button>
+                        <button type="button" class="social-btn facebook-btn">
+                            <span>📘</span> Facebook
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Signup Form -->
+                <form id="signupForm" class="auth-form" onsubmit="handleSignup(event)">
+                    <div class="form-group">
+                        <label for="fullname">Nombre Completo</label>
+                        <input type="text" id="fullname" name="fullname" placeholder="Juan García" required>
+                        <span class="input-icon">👤</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signup-email">Email</label>
+                        <input type="email" id="signup-email" name="email" placeholder="tu@email.com" required>
+                        <span class="input-icon">📧</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signup-password">Contraseña</label>
+                        <input type="password" id="signup-password" name="password" placeholder="••••••••" required>
+                        <span class="input-icon">🔒</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm-password">Confirmar Contraseña</label>
+                        <input type="password" id="confirm-password" name="confirm" placeholder="••••••••" required>
+                        <span class="input-icon">✓</span>
+                    </div>
+
+                    <div class="password-strength">
+                        <div class="strength-bar"></div>
+                        <span class="strength-text">Fortaleza: Débil</span>
+                    </div>
+
+                    <label class="checkbox">
+                        <input type="checkbox" required>
+                        <span>Acepto los <a href="#">términos y condiciones</a></span>
+                    </label>
+
+                    <button type="submit" class="submit-btn">Crear Cuenta</button>
+
+                    <div class="divider">o regístrate con</div>
+
+                    <div class="social-login">
+                        <button type="button" class="social-btn google-btn">
+                            <span>🔵</span> Google
+                        </button>
+                        <button type="button" class="social-btn facebook-btn">
+                            <span>📘</span> Facebook
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Benefits Section -->
+            <div class="benefits-section">
+                <div class="benefit-item">
+                    <div class="benefit-icon">🚚</div>
+                    <h4>Envío Rápido</h4>
+                    <p>Entrega en 24-48 horas</p>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">💳</div>
+                    <h4>Pago Seguro</h4>
+                    <p>Múltiples formas de pago</p>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">🔄</div>
+                    <h4>Cambios Fáciles</h4>
+                    <p>Hasta 30 días de garantía</p>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">💬</div>
+                    <h4>Soporte 24/7</h4>
+                    <p>Estamos aquí para ayudarte</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="login-script.js"></script>
+</body>
+</html>
