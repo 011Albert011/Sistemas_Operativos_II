@@ -1,6 +1,37 @@
 /* Login Page Styles */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+:root{
+    --header-height: 9rem;
+    --header-gap: 45rem;
+}
+
+.main-content{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f4f4f4;
+    
+    /* AÑADE ESTA LÍNEA */
+    padding-top: 150px; /* Esto empuja el cuadro debajo de los 9rem del header */
+    box-sizing: border-box; /* Para que el padding no rompa el tamaño del contenedor */
+}
+
+.registration-container {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    margin-top: 2rem; 
+
+    margin: 160px auto 50px auto;
+    position: relative;
+}
+
 .login-page {
+    margin-top: var(--header-gap);
     min-height: calc(100vh - var(--header-height));
     background-color: var(--bg-color); /* Unificado con el fondo global */
     display: flex;
