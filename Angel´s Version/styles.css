@@ -21,10 +21,10 @@
     --silver: #C5C6C7;
     --border-radius: 8px;
     --transition: all 0.3s ease;
-    --header-height: 100px;  /*aumentado para más separación */
+    --header-height: 9rem;  /*aumentado para más separación */
     --header-bg: rgba(11,13,23,.95); /* fondo opaco del header */
     --muted-border: rgba(255,255,255,0.06);
-    --content-gap: 200px;/* espacio extra entre header y contenido reducido para evitar hueco grande */
+    --content-gap: 0;/* espacio extra entre header y contenido reducido para evitar hueco grande */
 }   
 html, body { height: 100%; background-color: var(--bg-color); }
 body {
@@ -34,7 +34,7 @@ body {
     line-height: 1.6;
     overflow-x: hidden;
     /* padding-top = espacio reservado para header fijo + gap para separación visual */
-    padding-top: calc(var(--header-height)); /* header + separación */
+    padding-top: var(--header-height); /* header + separación */
 }  
 
 /* Contenedor reutilizable (centrado y con padding lateral)
@@ -884,4 +884,9 @@ body {
         transition: none !important;
         animation: none !important;
     }
+}
+
+.margen-header{
+    margin-top: 0 !important;
+    padding-top: 4rem;
 }
