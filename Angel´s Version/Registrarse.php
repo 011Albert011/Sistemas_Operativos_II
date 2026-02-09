@@ -28,22 +28,18 @@
                     <a href="Registrarse.php" class="tab-btn active">Registrarse</a>
                 </div>
                 <div class="wrapper">
-                <form action="" method="post">
+                <form action="" method="POST">
                     <h1>Registrarse</h1>
                     <div class="input-box">
-                        <input type="text" name="fullname" placeholder="Nombre completo" required>
+                        <input type="text" name="Nombre" placeholder="Nombre" required="">
                         <i class='bx bxs-user'></i>
                     </div>
                     <div class="input-box">
-                        <input type="email" name="email" placeholder="Correo electrónico" required>
+                        <input type="email" name="Correo" placeholder="Correo electrónico" required>
                         <i class='bx bxs-envelope'></i>
                     </div>
                     <div class="input-box">
-                        <input type="password" name="password" placeholder="Contraseña" required minlength="6">
-                        <i class='bx bxs-lock-alt'></i>
-                    </div>
-                    <div class="input-box">
-                        <input type="password" name="confirm" placeholder="Confirmar contraseña" required minlength="6">
+                        <input type="password" name="Password" placeholder="Contraseña" required minlength="6">
                         <i class='bx bxs-lock-alt'></i>
                     </div>
                     <button type="submit" class="btn">Crear Cuenta</button>
@@ -51,6 +47,43 @@
                 </form>
                 </div>
             </div>
+            
+            <!-- Php section -->
+            <?php 
+                
+                //si es que se envia el formulario, lo que se guardo en las casillas lo gurdamos en "variables" para despues meterlas a la base de datos
+                if($_SERVER["REQUEST_METHOD"] == "POST" ){
+                    $Nombre = $_REQUEST['Nombre'];
+                    $Correo = $_REQUEST['Correo'];
+                    $Password = $_REQUEST['Password'];
+                    
+                    //creamos la conexion a la base de datos(lacal host, nombre de usuario, contraseña, y la base da datos)
+                    $link= mysqli_connect("localhost", "root",  "","sistemasii");
+                    if (!$link) {
+                        die("Error de conexion: " . mysqli_connect_error());
+                    }
+                    //Revision (vemos si ya hay un usario con ese correo)
+                    $revision = "SELECT * FROM Usuario WHERE Correo = '$Correo'";
+                    $ResultadoR = mysqli_query($link,$revision);
+
+                    
+                    if (mysqli_num_rows($ResultadoR) > 0) {
+                        echo "Error: El correo electronico ya está registrado.";
+                    } else {
+                        //Insertamos todo en la base
+                        $query = "INSERT INTO usuario(Nombre, Correo, Password) 
+                        VALUES ('$Nombre', '$Correo', '$Password')";  
+
+                        if (mysqli_query($link, $query)){
+                            header("Location: login.php");
+                            exit();
+                        } else {
+                            echo "Error al registrar: " . mysqli_error($link);
+                        }
+                    }
+                }
+            ?>
+
             <!-- Benefits Section -->
             <div class="benefits-section">
                 <div class="benefit-item">
