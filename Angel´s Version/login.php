@@ -27,25 +27,52 @@
                     <a href="Registrarse.php" class="tab-btn">Registrarse</a>
                 </div>
                 <div class="wrapper">
-                    <form action="" method="post">
+                    <form action="" method="POST">
                         <h1>Iniciar Sesión</h1>
                         <div class="input-box">
-                            <input type="text" name="username" placeholder="Usuario o correo" required>
+                            <input type="text" name="Nombre" placeholder="Usuario" required>
                             <i class='bx bxs-user'></i>
                         </div>
                         <div class="input-box">
-                            <input type="password" name="password" placeholder="Contraseña" required>
+                            <input type="password" name="Password" placeholder="Contraseña" required>
                             <i class='bx bxs-lock-alt'></i>
-                        </div>
-                        <div class="remember-forgot">
-                            <label><input type="checkbox" name="remember"> Recuérdame</label>
-                            <a href="#">¿Olvidaste la contraseña?</a>
                         </div>
                         <button type="submit" class="btn">Iniciar Sesión</button>
                         <div class="register-link"><p>¿No tienes cuenta? <a href="Registrarse.php">Registrarte</a></p></div>
                     </form>
                 </div>
             </div>
+
+            <!-- Php section -->
+            <?php 
+                
+                //si es que se envia el formulario, lo que se guardo en las casillas lo gurdamos en "variables" para despues meterlas a la base de datos
+                if($_SERVER["REQUEST_METHOD"] == "POST" ){
+                    $Nombre = $_REQUEST['Nombre'];
+                    $Password = $_REQUEST['Password'];
+                    
+                    //creamos la conexion a la base de datos
+                    $link= mysqli_connect("localhost", "root",  "","sistemasii");
+                    if (!$link) {
+                        die("Error de conexion: " . mysqli_connect_error());
+                    }
+                    
+                    //CONSULTA
+                    $consulta = "SELECT * FROM Usuario where Nombre='$Nombre' AND Password='$Password'";
+                    $resultado = mysqli_query($link,$consulta);
+
+                    //VERIFICENTRO(checamos si esta el usuario en la base de datos jaja)
+                    if(mysqli_num_rows($resultado) > 0){
+                        $Usuario = mysqli_fetch_array($resultado);
+
+                        header("Location: indexprincipal.php");
+                        exit();
+                    }else{
+                        echo"Usuario o contraseña incorrectos";
+                    }
+                }
+            ?>
+
             <div class="benefits-section">
                 <div class="benefit-item">
                     <div class="benefit-icon">🚚</div>
