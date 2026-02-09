@@ -5,7 +5,7 @@ const products = [
         name: "Toyota RAV4 2022",
         category: "suv",
         price: 27999,
-        image: "https://images.unsplash.com/photo-1616627450198-8c8d2d1f9b24?auto=format&fit=crop&w=800&q=80",
+        image: "https://toyotaoaxaca.com.mx/wp-content/uploads/2019/01/diseno-trasero-rav4-350x240.jpg",
         description: "SUV confiable, eficiente y espaciosa"
     },
     {
@@ -13,7 +13,7 @@ const products = [
         name: "Honda Civic 2021",
         category: "sedan",
         price: 21999,
-        image: "https://images.unsplash.com/photo-1542367597-5a0e1c6b6f99?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1709100374265-9eb9da6a9192?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
         description: "Sedán cómodo y económico"
     },
     {
@@ -21,7 +21,7 @@ const products = [
         name: "Tesla Model 3",
         category: "electrico",
         price: 39999,
-        image: "https://images.unsplash.com/photo-1607798937831-7a1a9ff4ff7e?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1677792538242-3b5b0855ff51?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
         description: "100% eléctrico, autonomía extendida"
     },
     {
@@ -37,7 +37,7 @@ const products = [
         name: "Nissan Kicks",
         category: "suv",
         price: 18999,
-        image: "https://images.unsplash.com/photo-1549921296-3be4a3f6a8b6?auto=format&fit=crop&w=800&q=80",
+        image: "https://www.nissan.com.mx/content/dam/Nissan/mexico/assets/kicks_play_e_power/my25/vlp/diseno/nissan-2025-kicks_play_e_power_platinum-blanco_bitono-negro-exterior-diseno-aleron.jpg.ximg.l_12_h.smart.jpg",
         description: "Compacto, ideal para ciudad"
     },
     {
