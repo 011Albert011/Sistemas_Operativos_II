@@ -1,0 +1,14 @@
+amigos, les dejo la base de datos, lo hice en mysql workbench, asi que solo es copiar y pegar, como es un local host, la verdad no se como sirva el xamp, 
+pero en wampserver, con el root y el puerto por defecto se conecta sin problema:
+
+create database SistemasII;
+
+use sistemasii;
+
+create table Usuario(
+Id_Usuario integer not null auto_increment,
+Nombre varchar(64) not null,
+Correo varchar(64) not null unique,
+Password varchar(64) not null,
+primary key(Id_Usuario)
+);
