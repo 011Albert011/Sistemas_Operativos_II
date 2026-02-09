@@ -38,16 +38,6 @@ body {
 }  
 
 
-.error-message {
-    background-color: rgba(255, 0, 0, 0.1); /* Fondo rojo clarito */
-    color: #ff4d4d; /* Texto rojo */
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ff4d4d;
-    margin-bottom: 15px;
-    font-size: 14px;
-    text-align: center;
-}
 
 /* Contenedor reutilizable (centrado y con padding lateral)
    Usado en header, secciones y layout para mantener ancho consistente */

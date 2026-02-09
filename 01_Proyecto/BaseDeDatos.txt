@@ -1,0 +1,11 @@
+create database SistemasII;
+
+use sistemasii;
+
+create table Usuario(
+Id_Usuario integer not null auto_increment,
+Nombre varchar(64) not null,
+Correo varchar(64) not null unique,
+Password varchar(64) not null,
+primary key(Id_Usuario)
+);
