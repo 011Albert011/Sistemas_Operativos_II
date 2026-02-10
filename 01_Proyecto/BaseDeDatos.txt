@@ -9,3 +9,22 @@ Correo varchar(64) not null unique,
 Password varchar(64) not null,
 primary key(Id_Usuario)
 );
+
+use sistemasii;
+create table Carro(
+Id_Carro integer not null auto_increment,
+Nombre_C varchar(64),
+Categoria varchar(64),
+Imagen varchar (255),
+Descripcion varchar(255),
+Precio float not null,
+primary key (Id_Carro)
+);
+
+insert into Carro(Nombre_C,Categoria,Imagen, Descripcion,Precio) values
+('Toyota RAV4 2022', 'suv', 'ToyotaRAV42022.jpg' ,'SUV confiable, eficiente y espaciosa', 27999),
+('Honda Civic 2021','sedan','HondaCivic2021.avif', 'Sedán cómodo y económico', 21999),
+('Tesla Model 3', 'electrico','TeslaModel3.avif','100% eléctrico, autonomía extendida', 39999),
+('Ford Mustang GT','deportivo','FordMustangGT.avif','Deportivo, potente y elegante',55999),
+('Nissan Kicks','suv','NissanKicks.jpg','Compacto, ideal para ciudad',18999),
+('BMW Serie 3','sedan','BMWSerie3.avif','Lujo, performance y tecnología',34999);

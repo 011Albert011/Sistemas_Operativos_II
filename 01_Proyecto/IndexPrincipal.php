@@ -71,15 +71,36 @@
     <section class="products-section" id="productos">
         <div class="container">
             <h2 class="section-title">Nuestros Productos</h2>
-            <div class="filters">
-                <button class="filter-btn active" onclick="filterProducts('todos', this)">Todos</button>
-                <button class="filter-btn" onclick="filterProducts('suv', this)">SUV</button>
-                <button class="filter-btn" onclick="filterProducts('sedan', this)">Sedán</button>
-                <button class="filter-btn" onclick="filterProducts('electrico', this)">Eléctrico</button>
-                <button class="filter-btn" onclick="filterProducts('deportivo', this)">Deportivo</button>
-            </div>
             <div class="products-grid" id="productsGrid">
-                <!-- Los productos se generarán con JavaScript -->
+                <?php 
+                    // Conexión y consulta a la BD
+                    $link = mysqli_connect("localhost", "root", "", "sistemasii");
+                    $resultado = mysqli_query($link, "SELECT * FROM Carro");
+                    
+                    while($fila = mysqli_fetch_array($resultado)) {
+                        $id = $fila['Id_Carro'];
+                        $nombre = $fila['Nombre_C'];
+                        $categoria = $fila['Categoria'];
+                        $precio = $fila['Precio'];
+                        $imagen = $fila['Imagen'];
+                        $descripcion = $fila['Descripcion'];
+                ?>
+                    <div class="product-card" data-category="<?php echo strtolower($categoria); ?>">
+                        <div class="product-image"><img src="ImagenesProductos/<?php echo $imagen; ?>" alt="<?php echo $nombre; ?>"></div>
+                        <div class="product-info">
+                            <div class="product-category"><?php echo strtoupper($categoria); ?></div>
+                            <div class="product-name"><?php echo $nombre; ?></div>
+                            <div class="product-price">$<?php echo number_format($precio, 2); ?></div>
+                            <div class="product-description"><?php echo $descripcion; ?></div>
+                            <button class="add-to-cart-btn" onclick="addToCart(<?php echo $id; ?>, '<?php echo addslashes($nombre); ?>', <?php echo $precio; ?>)">
+                                Agregar al Carrito
+                            </button>
+                        </div>
+                    </div>
+                <?php
+                    }
+                    mysqli_close($link);
+                ?>
             </div>
         </div>
     </section>
