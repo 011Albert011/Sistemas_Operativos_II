@@ -8,7 +8,7 @@ require 'PHPMailer/src/Exception.php';
 require 'PHPMailer/src/PHPMailer.php';
 require 'PHPMailer/src/SMTP.php';
 
-function enviarTicketPorCorreo($email_usuario, $nombre_usuario, $ruta_archivo_ticket) {
+function enviarTicketPorCorreo($email_usuario, $nombre_usuario, $nombre_archivo) {
     $mail = new PHPMailer(true);
     
     try {
@@ -36,8 +36,8 @@ function enviarTicketPorCorreo($email_usuario, $nombre_usuario, $ruta_archivo_ti
         $mail->addAddress($email_usuario, $nombre_usuario);
 
         // --- ADJUNTO ---
-        if (file_exists($ruta_archivo_ticket) && file_exists($ruta_archivo_ticket)) {
-            $mail->addAttachment($ruta_archivo_ticket); // Adjunta el .txt generado
+        if (file_exists($nombre_archivo) && file_exists($nombre_archivo)) {
+            $mail->addAttachment($nombre_archivo); // Adjunta el .txt generado
         }
 
         // --- CONTENIDO ---

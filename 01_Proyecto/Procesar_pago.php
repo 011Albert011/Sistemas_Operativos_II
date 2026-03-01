@@ -55,9 +55,9 @@
         }
             
             if($TodoBien){
-                $Crear_Ticket = Crear_Ticket($items,$PagoTotal);
-                if($Crear_Ticket){
-                    $Mandar_Correo =  enviarTicketPorCorreo($Correo_Usuario, $Nombre_Usuario, $Crear_Ticket);
+                $nombre_archivo = Crear_Ticket($items,$PagoTotal); //recordar que con el return obtenemos el nombre del ticket
+                if($nombre_archivo){
+                    $Mandar_Correo =  enviarTicketPorCorreo($Correo_Usuario, $Nombre_Usuario, $nombre_archivo);
                     if($Mandar_Correo){
                     echo json_encode(['success' => true, 'message' => 'Compra guardada, Ticket generado y enviado.']);
                 } else {
