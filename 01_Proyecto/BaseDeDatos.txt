@@ -28,3 +28,20 @@ insert into Carro(Nombre_C,Categoria,Imagen, Descripcion,Precio) values
 ('Ford Mustang GT','deportivo','FordMustangGT.avif','Deportivo, potente y elegante',55999),
 ('Nissan Kicks','suv','NissanKicks.jpg','Compacto, ideal para ciudad',18999),
 ('BMW Serie 3','sedan','BMWSerie3.avif','Lujo, performance y tecnología',34999);
+
+CREATE TABLE ticket (
+Id_Ticket int NOT NULL AUTO_INCREMENT,
+Id_Usuario int NOT NULL,
+Fecha datetime DEFAULT NULL,
+Total_Pago decimal(10,2) DEFAULT NULL,
+PRIMARY KEY (Id_Ticket)
+);
+
+CREATE TABLE detalles_t (
+Id_Detalles int NOT NULL AUTO_INCREMENT,
+Id_Ticket int NOT NULL,
+Id_Carro int NOT NULL,
+Precio_Unitario decimal(10,2) DEFAULT NULL,
+Cantidad int NOT NULL,
+PRIMARY KEY (Id_Detalles)
+);

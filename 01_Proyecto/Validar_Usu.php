@@ -23,11 +23,10 @@ if ($row = mysqli_fetch_array($result)) {
         header("Location: IndexPrincipal.php");
         exit();
     } else {
-        header("Location: Error_Password.php");
+        header("Location: Login.php");
         exit();
     }
 } else {
-    header("Location: Error_Login.php");
+    header("Location: Login.php");
     exit();
 }
-?>

@@ -78,12 +78,41 @@ function checkout() {
         return;
     }
 
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    alert(`¡Compra completada! Total: $${total.toFixed(2)}\n\nGracias por tu compra en StyleHub.`);
-    
-    cart = [];
-    updateCart();
-    toggleCart();
+    //Enviamos el carrito (y opcionalmente el total) a PHP
+    //calculamos el total de nuevo por seguridad.
+    const totalPagar = cart.reduce((sum, it) => sum + it.price * it.quantity, 0);
+    const PagoT = {
+        items: cart,
+        total: totalPagar
+    };
+
+    fetch('procesar_pago.php', { 
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(PagoT)
+    })
+    //cuando php termine, devuelve una respuesta javascript
+    .then(response => response.json())
+    .then(data => {
+        if(data.success) {
+            // Esto solo pasa si el PHP guardó todo bien
+            alert('¡Compra Completada!\nTicket guardado y enviado a tu correo.');
+            
+            // 2. Vaciamos el carrito AQUÍ ADENTRO
+            cart = []; 
+            updateCart();
+            toggleCart();
+        } else {
+            alert('Error al procesar la compra: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión. Intenta de nuevo.');
+    });
+
 }
 
 // Notificación

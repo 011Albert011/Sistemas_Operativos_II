@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
 :root{
     --header-height: 9rem;
-    --header-gap: 45rem;
+    --header-gap: 30rem;
 }
 
 .main-content{

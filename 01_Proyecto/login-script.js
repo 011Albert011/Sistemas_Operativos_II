@@ -85,7 +85,7 @@ function handleLogin(event) {
         }));
 
         // Redirigir a la tienda
-        window.location.href = 'index.html';
+        window.location.href = 'IndexPrincipal.php';
     }, 1500);
 }
 

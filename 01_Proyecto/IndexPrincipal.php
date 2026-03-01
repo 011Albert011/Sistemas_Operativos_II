@@ -158,9 +158,9 @@
                     </div>
                 </div>
                 <form class="contact-form" onsubmit="handleSubmit(event)">
-                    <input type="text" placeholder="Tu nombre" required>
-                    <input type="email" placeholder="Tu email" required>
-                    <textarea placeholder="Tu mensaje" rows="5" required></textarea>
+                    <input type="text" name="nombre" id="nombre" placeholder="Tu nombre" required>
+                    <input type="email" name="email" id="email" placeholder="Tu email" required>
+                    <textarea name="mensaje" id="mensaje" placeholder="Tu mensaje" rows="5" required></textarea>
                     <button type="submit" class="submit-btn">Enviar Mensaje</button>
                 </form>
             </div>

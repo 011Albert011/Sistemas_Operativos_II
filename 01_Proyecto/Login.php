@@ -11,7 +11,7 @@
 <body>
     <!-- Header -->
     <header class="header">
-        <div class="header-content">
+        <div class="container">
                 <div class="logo ubicado">
                     <h1>AutoHub</h1>
                 </div>
@@ -21,7 +21,7 @@
 <!-- Php section -->
 <?php 
     session_start();
-    $error_msg = ""; //varaible para el mensaje de
+    $error_msg = ""; //varaible para el mensaje de error
     //si es que se envia el formulario, lo que se guardo en las casillas lo gurdamos en "variables" para despues meterlas a la base de datos
     if($_SERVER["REQUEST_METHOD"] == "POST" ){
         $Nombre = $_REQUEST['Nombre'];
@@ -40,7 +40,13 @@
         //VERIFICENTRO(checamos si esta el usuario en la base de datos jaja)
         if(mysqli_num_rows($resultado) > 0){
             $Usuario = mysqli_fetch_array($resultado);
-            $_SESSION["k_username"] = $Usuario['Nombre'];
+    
+            // GUARDAMOS TODO LO NECESARIO
+            $_SESSION["k_username"] = $Usuario['Nombre']; 
+            $_SESSION["id_usuario"] = $Usuario['Id_Usuario']; 
+            $_SESSION["usuario"]    = $Usuario['Nombre'];     
+            $_SESSION["correo"]     = $Usuario['Correo'];      
+    
             header("Location: IndexPrincipal.php");
             exit();
         }else{
