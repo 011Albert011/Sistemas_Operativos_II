@@ -36,7 +36,7 @@ function enviarTicketPorCorreo($email_usuario, $nombre_usuario, $nombre_archivo)
         $mail->addAddress($email_usuario, $nombre_usuario);
 
         // --- ADJUNTO ---
-        if (file_exists($nombre_archivo) && file_exists($nombre_archivo)) {
+        if (file_exists($nombre_archivo)) {
             $mail->addAttachment($nombre_archivo); // Adjunta el .txt generado
         }
 

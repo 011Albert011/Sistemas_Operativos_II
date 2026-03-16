@@ -78,42 +78,51 @@ function checkout() {
         return;
     }
 
-    //Enviamos el carrito (y opcionalmente el total) a PHP
-    //calculamos el total de nuevo por seguridad.
     const totalPagar = cart.reduce((sum, it) => sum + it.price * it.quantity, 0);
     const PagoT = {
         items: cart,
         total: totalPagar
     };
 
-    fetch('procesar_pago.php', { 
+    fetch('Procesar_pago.php', { 
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(PagoT)
     })
-    //cuando php termine, devuelve una respuesta javascript
     .then(response => response.json())
     .then(data => {
         if(data.success) {
-            // Esto solo pasa si el PHP guardó todo bien
-            alert('¡Compra Completada!\nTicket guardado y enviado a tu correo.');
-            
-            // 2. Vaciamos el carrito AQUÍ ADENTRO
+            // 1. Informamos al usuario (Este alert ayuda a que el navegador permita el popup)
+            alert(data.message);
+
+            // 2. Si el servidor nos envió la ruta del archivo físico
+            if(data.ruta) {
+                // Abrimos nuestro puente 'Imprimir.php' pasando la ruta real del ticket
+                const urlImpresion = 'Imprimir.php?archivo=' + encodeURIComponent(data.ruta);
+                const ventanaImpresion = window.open(urlImpresion, '_blank');
+
+                if (!ventanaImpresion) {
+                    alert('Por favor, permite las ventanas emergentes para que el ticket se imprima automáticamente.');
+                }
+            }
+
+            // 3. Limpieza de la interfaz
             cart = []; 
             updateCart();
             toggleCart();
+            
         } else {
-            alert('Error al procesar la compra: ' + data.message);
+            alert('Error al procesar: ' + data.message);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error de conexión. Intenta de nuevo.');
+        alert('Hubo un problema con la conexión al servidor.');
     });
-
 }
+
 
 // Notificación
 function showNotification(message) {

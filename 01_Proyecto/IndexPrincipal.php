@@ -31,6 +31,11 @@
                         <a href="#marcas">Marcas</a>
                         <a href="#financiacion">Financiación</a>
                         <a href="#contacto">Contacto</a>
+                        <?php 
+                            // Verificamos si existe un ticket en la sesion
+                            $urlTicket = isset($_SESSION['ultimo_ticket']) ? $_SESSION['ultimo_ticket'] : '#';
+                        ?>
+                        <a href="Imprimir.php?archivo=<?php echo $urlTicket; ?>" target="_blank">Ticket</a>
                     </nav>
                     <div class="cart-icon" onclick="toggleCart()">
                         <span>🛒</span>
