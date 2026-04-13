@@ -588,6 +588,12 @@ body {
     margin-bottom: 1rem;
 }
 
+.product-invenario {
+    color: rgba(230,240,255,0.8);
+    font-size: 0.7rem;
+    margin-bottom: 1rem;
+}
+
 .add-to-cart-btn {
     width: 100%;
     padding: 0.8rem;

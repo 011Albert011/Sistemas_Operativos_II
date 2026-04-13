@@ -45,3 +45,12 @@ Precio_Unitario decimal(10,2) DEFAULT NULL,
 Cantidad int NOT NULL,
 PRIMARY KEY (Id_Detalles)
 );
+
+alter table carro add column Stock integer;
+
+update carro set stock = 15 where Id_carro=1;
+update carro set stock = 11 where Id_carro=2;
+update carro set stock = 23 where Id_carro=3;
+update carro set stock = 12 where Id_carro=4;
+update carro set stock = 5 where Id_carro=5;
+update carro set stock = 7 where Id_carro=6;

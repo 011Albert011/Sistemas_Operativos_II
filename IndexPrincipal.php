@@ -84,7 +84,7 @@
                 <?php 
                     // Conexión y consulta a la BD
                     $link = mysqli_connect("localhost", "root", "", "sistemasii");
-                    $resultado = mysqli_query($link, "SELECT * FROM Carro");
+                    $resultado = mysqli_query($link, "SELECT * FROM Carro WHERE Stock > 0 ");
                     
                     while($fila = mysqli_fetch_array($resultado)) {
                         $id = $fila['Id_Carro'];
@@ -93,6 +93,7 @@
                         $precio = $fila['Precio'];
                         $imagen = $fila['Imagen'];
                         $descripcion = $fila['Descripcion'];
+                        $stock = $fila['Stock'];
                 ?>
                     <div class="product-card" data-category="<?php echo strtolower($categoria); ?>">
                         <div class="product-image"><img src="ImagenesProductos/<?php echo $imagen; ?>" alt="<?php echo $nombre; ?>"></div>
@@ -101,6 +102,7 @@
                             <div class="product-name"><?php echo $nombre; ?></div>
                             <div class="product-price">$<?php echo number_format($precio, 2); ?></div>
                             <div class="product-description"><?php echo $descripcion; ?></div>
+                            <div class="product-inventario">Inventario: <?php echo $stock; ?></div>
                             <button class="add-to-cart-btn" onclick="addToCart(<?php echo $id; ?>, '<?php echo addslashes($nombre); ?>', <?php echo $precio; ?>)">
                                 Agregar al Carrito
                             </button>

@@ -42,11 +42,29 @@ if(mysqli_query($link, $Agre_Ticket)){
         $Precio = $item['price'];
         $Cantidad = $item['quantity'];
 
-        $Agre_Detalles = "INSERT INTO detalles_t(Id_Ticket, Id_Carro, Precio_Unitario, Cantidad) VALUES ('$Id_Ticket', '$Id_Producto', '$Precio', '$Cantidad')";
+        //Middleware de validacion 
+        //consultamos la cantidad de los vehiculos
+        $restStock = mysqli_query($link, "SELECT Stock FROM carro where Id_Carro = '$Id_Producto'" );
+        $filastock =mysqli_fetch_assoc($restStock);
+        $stockDisponible= $filastock['Stock'];
 
-        if (!mysqli_query($link, $Agre_Detalles)) {
-            $TodoBien = false;
-            break;
+        if($stockDisponible >= $Cantidad){
+            //actualizamos el fucking recurso
+            $nuevoStock = $stockDisponible - $Cantidad;
+            mysqli_query($link, "UPDATE carro set Stock = $nuevoStock WHERE Id_Carro = '$Id_Producto'");
+
+            $Agre_Detalles = "INSERT INTO detalles_t(Id_Ticket, Id_Carro, Precio_Unitario, Cantidad) VALUES ('$Id_Ticket', '$Id_Producto', '$Precio', '$Cantidad')";
+            if(!mysqli_query($link, $Agre_Detalles)){
+                $TodoBien = false;
+                break;
+            }
+
+        }else {
+        ob_clean();
+            //si no hay suficniete stock
+            echo json_encode(['success' => false, 'message' => "Stock insuficiente para un modelo seleccionado."]);
+            mysqli_close($link);
+            exit;
         }
     }
     
