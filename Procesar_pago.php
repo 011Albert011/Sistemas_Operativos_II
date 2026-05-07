@@ -47,8 +47,9 @@ if(mysqli_query($link, $Agre_Ticket)){
         $restStock = mysqli_query($link, "SELECT Stock FROM carro where Id_Carro = '$Id_Producto'" );
         $filastock =mysqli_fetch_assoc($restStock);
         $stockDisponible= $filastock['Stock'];
+        $stockModificado= $stockDisponible - 1;
 
-        if($stockDisponible >= $Cantidad){
+        if($stockModificado >= $Cantidad){
             //actualizamos el fucking recurso
             $nuevoStock = $stockDisponible - $Cantidad;
             mysqli_query($link, "UPDATE carro set Stock = $nuevoStock WHERE Id_Carro = '$Id_Producto'");

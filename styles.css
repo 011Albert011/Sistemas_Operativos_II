@@ -11,6 +11,7 @@
     box-sizing: border-box;
 } 
 
+
 /* Base del documento — establece fondo global y padding para el header fijo */
 :root {
     --bg-color: #0B0C10;       /* Fondo único para TODO el sitio */
@@ -908,4 +909,218 @@ body {
 .margen-header{
     margin-top: 0 !important;
     padding-top: 4rem;
+}
+
+/* ============================================
+   ESTILOS PARA TARJETA.HTML (Formulario de Pago)
+   ============================================ */
+
+/* Clase única para la página de pago - evita conflictos */
+.tarjeta-credito-page {
+    padding-top: 2rem !important;
+    background: linear-gradient(135deg, #0c1b2f, #1a2a40) !important;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Contenedor principal de pago */
+.tarjeta-credito-page .container {
+    max-width: 1100px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    border-radius: 32px;
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    margin: 0 auto;
+}
+
+/* Layout de dos columnas */
+.tarjeta-credito-page .payment-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+/* Columna izquierda: vista previa tarjeta */
+.tarjeta-credito-page .card-preview {
+    flex: 1.2;
+    min-width: 260px;
+}
+
+/* Columna derecha: formulario */
+.tarjeta-credito-page .form-section {
+    flex: 1.8;
+    min-width: 280px;
+}
+
+/* Estilo de la tarjeta virtual */
+.tarjeta-credito-page .credit-card {
+    background: linear-gradient(145deg, #2d3e5f, #1b2a41);
+    border-radius: 24px;
+    padding: 25px;
+    box-shadow: 0 20px 30px -10px rgba(0,0,0,0.4);
+    color: white;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.tarjeta-credito-page .credit-card::before {
+    content: "";
+    position: absolute;
+    top: -30%;
+    left: -20%;
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0) 70%);
+    pointer-events: none;
+}
+
+.tarjeta-credito-page .card-brand {
+    text-align: right;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    margin-bottom: 40px;
+    opacity: 0.9;
+}
+
+.tarjeta-credito-page .card-number-display {
+    font-size: 22px;
+    letter-spacing: 3px;
+    margin-bottom: 25px;
+    word-break: break-word;
+    font-family: monospace;
+    font-weight: 500;
+    background: rgba(0,0,0,0.3);
+    padding: 12px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.tarjeta-credito-page .card-details {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.tarjeta-credito-page .card-holder-area,
+.tarjeta-credito-page .card-expiry-area {
+    font-size: 14px;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.tarjeta-credito-page .card-holder-name,
+.tarjeta-credito-page .card-expiry-date {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 6px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Estilos del formulario de pago */
+.tarjeta-credito-page .form-group {
+    margin-bottom: 18px;
+}
+
+.tarjeta-credito-page .form-group label {
+    display: block;
+    margin-bottom: 6px;
+    color: #eef4ff;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.tarjeta-credito-page .form-group input {
+    width: 100%;
+    padding: 14px 16px;
+    background: #f1f5f9;
+    border: none;
+    border-radius: 16px;
+    font-size: 16px;
+    transition: 0.2s;
+    outline: none;
+    font-weight: 500;
+    color: #1a1a2e;
+}
+
+.tarjeta-credito-page .form-group input:focus {
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.3);
+}
+
+.tarjeta-credito-page .row-2cols {
+    display: flex;
+    gap: 20px;
+}
+
+.tarjeta-credito-page .row-2cols .form-group {
+    flex: 1;
+}
+
+/* Botón de pago */
+.tarjeta-credito-page .btn-pay {
+    width: 100%;
+    padding: 15px;
+    background: #ff6b00;
+    border: none;
+    border-radius: 40px;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-top: 10px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+}
+
+.tarjeta-credito-page .btn-pay:hover {
+    background: #e05a00;
+    transform: scale(0.98);
+}
+
+/* Timer / tiempo restante */
+.tarjeta-credito-page .timer-area {
+    margin-top: 20px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 60px;
+    padding: 10px 16px;
+    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(4px);
+}
+
+.tarjeta-credito-page .timer-label {
+    font-size: 14px;
+    color: #cbd5e6;
+}
+
+.tarjeta-credito-page .timer-count {
+    font-family: monospace;
+    font-size: 24px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: #facc15;
+}
+
+/* Responsive para tarjeta.html */
+@media (max-width: 760px) {
+    .tarjeta-credito-page .container {
+        padding: 18px;
+    }
+    .tarjeta-credito-page .card-number-display {
+        font-size: 18px;
+        letter-spacing: 2px;
+    }
+    .tarjeta-credito-page .row-2cols {
+        flex-direction: column;
+        gap: 0;
+    }
 }
