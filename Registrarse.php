@@ -50,39 +50,75 @@
             
             <!-- Php section -->
             <?php 
-                
-                //si es que se envia el formulario, lo que se guardo en las casillas lo gurdamos en "variables" para despues meterlas a la base de datos
+                $error_msg = '';
+
                 if($_SERVER["REQUEST_METHOD"] == "POST" ){
-                    $Nombre = $_REQUEST['Nombre'];
-                    $Correo = $_REQUEST['Correo'];
-                    $Password = $_REQUEST['Password'];
-                    
-                    //creamos la conexion a la base de datos(lacal host, nombre de usuario, contraseña, y la base da datos)
-                    $link= mysqli_connect("localhost", "root",  "","sistemasii");
+                    $Nombre = trim($_REQUEST['Nombre'] ?? '');
+                    $Correo = trim($_REQUEST['Correo'] ?? '');
+                    $Password = $_REQUEST['Password'] ?? '';
+
+                    $link = mysqli_connect("localhost", "root",  "","sistemasii");
                     if (!$link) {
                         die("Error de conexion: " . mysqli_connect_error());
                     }
-                    //Revision (vemos si ya hay un usario con ese correo)
-                    $revision = "SELECT * FROM Usuario WHERE Correo = '$Correo'";
-                    $ResultadoR = mysqli_query($link,$revision);
 
-                    
-                    if (mysqli_num_rows($ResultadoR) > 0) {
-                        echo "Error: El correo electronico ya está registrado.";
-                    } else {
-                        //Insertamos todo en la base
-                        $query = "INSERT INTO usuario(Nombre, Correo, Password) 
-                        VALUES ('$Nombre', '$Correo', '$Password')";  
+                    $Correo = filter_var($Correo, FILTER_VALIDATE_EMAIL) ? $Correo : '';
+                    if (!$Correo) {
+                        $error_msg = "Ingresa un correo electrónico válido.";
+                    }
 
-                        if (mysqli_query($link, $query)){
-                            header("Location: Login.php");
-                            exit();
-                        } else {
-                            echo "Error al registrar: " . mysqli_error($link);
+                    if (!$error_msg) {
+                        $revision = "SELECT Id_Usuario FROM Usuario WHERE Correo = ? LIMIT 1";
+                        // prepara la consulta para verificar si el correo ya existe
+                        if ($stmt = mysqli_prepare($link, $revision)) {
+                            // enlaza el parametro de correo
+                            mysqli_stmt_bind_param($stmt, "s", $Correo);
+                            // ejecuta la consulta preparada
+                            mysqli_stmt_execute($stmt);
+                            // almacena el resultado para contar filas
+                            mysqli_stmt_store_result($stmt);
+
+                            if (mysqli_stmt_num_rows($stmt) > 0) {
+                                $error_msg = "Error: El correo electronico ya está registrado.";
+                            }
+
+                            // cierra la consulta preparada
+                            mysqli_stmt_close($stmt);
                         }
                     }
+
+                    if (!$error_msg) {
+                        // crea un hash seguro de la contrasena usando bcrypt
+                        $hashedPassword = password_hash($Password, PASSWORD_BCRYPT);
+                        $query = "INSERT INTO Usuario (Nombre, Correo, Password) VALUES (?, ?, ?)";
+                        // prepara la consulta para insertar el nuevo usuario
+                        if ($stmt = mysqli_prepare($link, $query)) {
+                            // enlaza los parametros: nombre, correo, contrasena hasheada
+                            mysqli_stmt_bind_param($stmt, "sss", $Nombre, $Correo, $hashedPassword);
+                            if (mysqli_stmt_execute($stmt)) {
+                                // cierra la consulta preparada
+                                mysqli_stmt_close($stmt);
+                                mysqli_close($link);
+                                header("Location: Login.php");
+                                exit();
+                            } else {
+                                $error_msg = "Error al registrar: " . mysqli_error($link);
+                            }
+                            // cierra la consulta preparada
+                            mysqli_stmt_close($stmt);
+                        } else {
+                            $error_msg = "Error interno de servidor.";
+                        }
+                    }
+
+                    mysqli_close($link);
                 }
             ?>
+            <?php if (!empty($error_msg)): ?>
+                <div class="mensaje-error">
+                    <?php echo htmlspecialchars($error_msg, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>
+                </div>
+            <?php endif; ?>
 
             <!-- Benefits Section -->
             <div class="benefits-section">
