@@ -21,39 +21,81 @@
 <!-- Php section -->
 <?php 
     session_start();
-    $error_msg = ""; //varaible para el mensaje de error
-    //si es que se envia el formulario, lo que se guardo en las casillas lo gurdamos en "variables" para despues meterlas a la base de datos
+    $error_msg = "";
+
     if($_SERVER["REQUEST_METHOD"] == "POST" ){
-        $Nombre = $_REQUEST['Nombre'];
-        $Password = $_REQUEST['Password'];
-                        
-        //creamos la conexion a la base de datos
+        $Nombre = trim($_REQUEST['Nombre'] ?? '');
+        $Password = $_REQUEST['Password'] ?? '';
+
         $link= mysqli_connect("localhost", "root",  "","sistemasii");
         if (!$link) {
             die("Error de conexion: " . mysqli_connect_error());
         }
-                        
-        //CONSULTA
-        $consulta = "SELECT * FROM Usuario where Nombre='$Nombre' AND Password='$Password'";
-        $resultado = mysqli_query($link,$consulta);
 
-        //VERIFICENTRO(checamos si esta el usuario en la base de datos jaja)
-        if(mysqli_num_rows($resultado) > 0){
-            $Usuario = mysqli_fetch_array($resultado);
-    
-            // GUARDAMOS TODO LO NECESARIO
-            $_SESSION["k_username"] = $Usuario['Nombre']; 
-            $_SESSION["id_usuario"] = $Usuario['Id_Usuario']; 
-            $_SESSION["usuario"]    = $Usuario['Nombre'];     
-            $_SESSION["correo"]     = $Usuario['Correo'];      
-    
-            header("Location: IndexPrincipal.php");
-            exit();
-        }else{
-            $error_msg = "Usuario o contraseña incorrectos";
+        $consulta = "SELECT * FROM Usuario WHERE Nombre = ? LIMIT 1";
+        // prepara la consulta para evitar sql injection usando parametros
+        if ($stmt = mysqli_prepare($link, $consulta)) {
+            // enlaza el parametro de nombre de usuario
+            mysqli_stmt_bind_param($stmt, "s", $Nombre);
+            // ejecuta la consulta preparada
+            mysqli_stmt_execute($stmt);
+            // obtiene el resultado de la consulta
+            $resultado = mysqli_stmt_get_result($stmt);
+
+            if ($resultado && mysqli_num_rows($resultado) > 0) {
+                $Usuario = mysqli_fetch_array($resultado, MYSQLI_ASSOC);
+                $hashedPassword = $Usuario['Password'];
+
+                // verifica la contrasena usando bcrypt
+                if (password_verify($Password, $hashedPassword)) {
+                    // regenera el id de sesion para evitar session fixation
+                    session_regenerate_id(true);
+                    $_SESSION["k_username"] = $Usuario['Nombre'];
+                    $_SESSION["id_usuario"] = $Usuario['Id_Usuario'];
+                    $_SESSION["usuario"]    = $Usuario['Nombre'];
+                    $_SESSION["correo"]     = $Usuario['Correo'];
+
+                    header("Location: IndexPrincipal.php");
+                    exit();
+                } elseif ($Password === $hashedPassword) {
+                    // caso legacy: si la contrasena esta en texto plano, la actualiza a hash
+                    $newHash = password_hash($Password, PASSWORD_BCRYPT);
+                    // prepara consulta para actualizar contrasena
+                    $updateStmt = mysqli_prepare($link, "UPDATE Usuario SET Password = ? WHERE Id_Usuario = ?");
+                    if ($updateStmt) {
+                        // enlaza parametros para actualizar
+                        mysqli_stmt_bind_param($updateStmt, "si", $newHash, $Usuario['Id_Usuario']);
+                        // ejecuta la actualizacion
+                        mysqli_stmt_execute($updateStmt);
+                        // cierra la consulta preparada
+                        mysqli_stmt_close($updateStmt);
+                    }
+                    // regenera sesion despues de actualizar
+                    session_regenerate_id(true);
+                    $_SESSION["k_username"] = $Usuario['Nombre'];
+                    $_SESSION["id_usuario"] = $Usuario['Id_Usuario'];
+                    $_SESSION["usuario"]    = $Usuario['Nombre'];
+                    $_SESSION["correo"]     = $Usuario['Correo'];
+
+                    header("Location: IndexPrincipal.php");
+                    exit();
+                } else {
+                    $error_msg = "Usuario o contraseña incorrectos";
+                }
+            } else {
+                $error_msg = "Usuario o contraseña incorrectos";
+            }
+
+            // cierra la consulta preparada
+            mysqli_stmt_close($stmt);
+        } else {
+            $error_msg = "Error interno de servidor.";
         }
+
+        mysqli_close($link);
     }
 ?>
+
 
     <!-- Login Container -->
     <div class="login-page">

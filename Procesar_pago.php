@@ -1,15 +1,13 @@
 <?php
-ob_start(); // Atrapa cualquier salida accidental (errores, espacios)
+ob_start();
 session_start();
 
 require_once 'Generar_Ticket.php';
 require_once 'Mandar_Correo.php';
 
-// Recibimos los datos del carrito
 $json = file_get_contents('php://input'); 
-$data = json_decode($json, true); 
+$data = json_decode($json, true);
 
-// Conectamos con la base de datos
 $link = mysqli_connect("localhost", "root", "", "sistemasii");
 if(!$link){
     ob_clean();
@@ -17,7 +15,6 @@ if(!$link){
     exit;
 }
 
-// Guardamos el contenido en variables
 $items = $data['items'] ?? [];
 $PagoTotal = $data['total'] ?? 0;
 $UsuarioID = $_SESSION['id_usuario'] ?? null; 
@@ -27,81 +24,128 @@ $Nombre_Usuario = $_SESSION['usuario'] ?? null;
 if (!$UsuarioID) {
     ob_clean();
     echo json_encode(['success' => false, 'message' => 'Sesion no encontrada. Vuelve a iniciar sesion.']);
+    mysqli_close($link);
     exit;
 }
 
-// 1. Agregamos a la tabla Ticket
-$Agre_Ticket = "INSERT INTO ticket(Id_Usuario, fecha, Total_Pago) VALUES ('$UsuarioID', NOW(), '$PagoTotal')";
+mysqli_begin_transaction($link);
 
-if(mysqli_query($link, $Agre_Ticket)){
-    $Id_Ticket = mysqli_insert_id($link); 
-    $TodoBien = true;
-
-    foreach ($items as $item){
-        $Id_Producto = $item['id'];
-        $Precio = $item['price'];
-        $Cantidad = $item['quantity'];
-
-        //Middleware de validacion 
-        //consultamos la cantidad de los vehiculos
-        $restStock = mysqli_query($link, "SELECT Stock FROM carro where Id_Carro = '$Id_Producto'" );
-        $filastock =mysqli_fetch_assoc($restStock);
-        $stockDisponible= $filastock['Stock'];
-
-        if($stockDisponible >= $Cantidad){
-            //actualizamos el fucking recurso
-            $nuevoStock = $stockDisponible - $Cantidad;
-            mysqli_query($link, "UPDATE carro set Stock = $nuevoStock WHERE Id_Carro = '$Id_Producto'");
-
-            $Agre_Detalles = "INSERT INTO detalles_t(Id_Ticket, Id_Carro, Precio_Unitario, Cantidad) VALUES ('$Id_Ticket', '$Id_Producto', '$Precio', '$Cantidad')";
-            if(!mysqli_query($link, $Agre_Detalles)){
-                $TodoBien = false;
-                break;
-            }
-
-        }else {
-        ob_clean();
-            //si no hay suficniete stock
-            echo json_encode(['success' => false, 'message' => "Stock insuficiente para un modelo seleccionado."]);
-            mysqli_close($link);
-            exit;
-        }
-    }
-    
-    if($TodoBien){
-        $nombre_archivo = Crear_Ticket($items, $PagoTotal); 
-        
-        if($nombre_archivo){
-            $Mandar_Correo = enviarTicketPorCorreo($Correo_Usuario, $Nombre_Usuario, $nombre_archivo);
-            $soloNombre = basename($nombre_archivo);
-            $_SESSION['ultimo_ticket'] = 'tickets/' . $soloNombre;
-
-            ob_clean(); // Limpiamos el buffer antes de enviar el JSON final
-            if($Mandar_Correo){
-                echo json_encode([
-                    'success' => true, 
-                    'message' => 'Compra exitosa, ticket enviado e imprimiendo...',
-                    'ruta' => 'tickets/' . $soloNombre
-                ]);
-            } else {
-                echo json_encode([
-                    'success' => true, 
-                    'message' => 'Compra guardada pero falló el envío del correo. Iniciando impresión...',
-                    'ruta' => 'tickets/' . $soloNombre
-                ]);
-            }
-            exit; // Terminamos aquí para evitar basura extra
-        } else {
-            ob_clean();
-            echo json_encode(['success' => false, 'message' => 'Error al crear el archivo físico del Ticket.']);
-        }
-    } else {
-        ob_clean();
-        echo json_encode(['success' => false, 'message' => 'Error al guardar los detalles en la BD.']);
-    }
-} else {
+// prepara la consulta para insertar el ticket maestro
+$ticketStmt = mysqli_prepare($link, "INSERT INTO ticket (Id_Usuario, fecha, Total_Pago) VALUES (?, NOW(), ?)");
+if (!$ticketStmt) {
+    mysqli_rollback($link);
+    ob_clean();
+    echo json_encode(['success' => false, 'message' => 'Error interno al crear el ticket.']);
+    mysqli_close($link);
+    exit;
+}
+// enlaza los parametros: id usuario, total pago
+mysqli_stmt_bind_param($ticketStmt, "id", $UsuarioID, $PagoTotal);
+if (!mysqli_stmt_execute($ticketStmt)) {
+    mysqli_stmt_close($ticketStmt);
+    mysqli_rollback($link);
     ob_clean();
     echo json_encode(['success' => false, 'message' => 'Error al crear el ticket maestro.']);
+    mysqli_close($link);
+    exit;
+}
+$Id_Ticket = mysqli_insert_id($link);
+mysqli_stmt_close($ticketStmt);
+
+// prepara consultas para stock, actualizacion y detalles
+$stockStmt = mysqli_prepare($link, "SELECT Stock FROM carro WHERE Id_Carro = ? LIMIT 1");
+$updateStockStmt = mysqli_prepare($link, "UPDATE carro SET Stock = ? WHERE Id_Carro = ?");
+$detallesStmt = mysqli_prepare($link, "INSERT INTO detalles_t (Id_Ticket, Id_Carro, Precio_Unitario, Cantidad) VALUES (?, ?, ?, ?)");
+
+if (!$stockStmt || !$updateStockStmt || !$detallesStmt) {
+    mysqli_rollback($link);
+    ob_clean();
+    echo json_encode(['success' => false, 'message' => 'Error interno al preparar las consultas.']);
+    mysqli_close($link);
+    exit;
+}
+
+$TodoBien = true;
+
+foreach ($items as $item) {
+    $Id_Producto = intval($item['id'] ?? 0);
+    $Precio = floatval($item['price'] ?? 0);
+    $Cantidad = intval($item['quantity'] ?? 0);
+
+    if ($Id_Producto <= 0 || $Cantidad <= 0 || $Precio < 0) {
+        $TodoBien = false;
+        break;
+    }
+
+    // enlaza parametro para consultar stock
+    mysqli_stmt_bind_param($stockStmt, "i", $Id_Producto);
+    mysqli_stmt_execute($stockStmt);
+    // enlaza resultado para obtener stock disponible
+    mysqli_stmt_bind_result($stockStmt, $stockDisponible);
+    mysqli_stmt_fetch($stockStmt);
+    mysqli_stmt_store_result($stockStmt);
+
+    if ($stockDisponible === null || $stockDisponible < $Cantidad) {
+        $TodoBien = false;
+        break;
+    }
+
+    $nuevoStock = $stockDisponible - $Cantidad;
+    // enlaza parametros para actualizar stock
+    mysqli_stmt_bind_param($updateStockStmt, "ii", $nuevoStock, $Id_Producto);
+    if (!mysqli_stmt_execute($updateStockStmt)) {
+        $TodoBien = false;
+        break;
+    }
+
+    // enlaza parametros para insertar detalles del ticket
+    mysqli_stmt_bind_param($detallesStmt, "iidi", $Id_Ticket, $Id_Producto, $Precio, $Cantidad);
+    if (!mysqli_stmt_execute($detallesStmt)) {
+        $TodoBien = false;
+        break;
+    }
+}
+
+mysqli_stmt_close($stockStmt);
+mysqli_stmt_close($updateStockStmt);
+mysqli_stmt_close($detallesStmt);
+
+if (!$TodoBien) {
+    mysqli_rollback($link);
+    ob_clean();
+    echo json_encode(['success' => false, 'message' => 'Stock insuficiente o error interno al procesar la compra.']);
+    mysqli_close($link);
+    exit;
+}
+
+// confirma la transaccion si todo salio bien
+mysqli_commit($link);
+
+$nombre_archivo = Crear_Ticket($items, $PagoTotal);
+if (!$nombre_archivo) {
+    ob_clean();
+    echo json_encode(['success' => false, 'message' => 'Error al crear el archivo físico del Ticket.']);
+    mysqli_close($link);
+    exit;
+}
+
+$Mandar_Correo = enviarTicketPorCorreo($Correo_Usuario, $Nombre_Usuario, $nombre_archivo);
+$soloNombre = basename($nombre_archivo);
+$_SESSION['ultimo_ticket'] = 'tickets/' . $soloNombre;
+
+ob_clean();
+if ($Mandar_Correo) {
+    echo json_encode([
+        'success' => true,
+        'message' => 'Compra exitosa, ticket enviado e imprimiendo...',
+        'ruta' => 'tickets/' . $soloNombre
+    ]);
+} else {
+    echo json_encode([
+        'success' => true,
+        'message' => 'Compra guardada pero falló el envío del correo. Iniciando impresión...',
+        'ruta' => 'tickets/' . $soloNombre
+    ]);
 }
 
 mysqli_close($link);

@@ -1,11 +1,61 @@
 // Carrito (el contenido de productos viene desde PHP)
 
 let cart = [];
+const stockWorker = new Worker('worker.js');
 
-// Agregar al carrito
+// Escuchar respuestas del worker
+stockWorker.onmessage = function(e) {
+    const { action } = e.data;
+    if (action === 'stockValidated') {
+        const { productId, productName, productPrice, isValid, newStock } = e.data;
+        if (isValid) {
+            // Procede a agregar al carrito
+            addToCartInternal(productId, productName, productPrice);
+        } else {
+            showNotification('Stock insuficiente');
+        }
+    } else if (action === 'paymentProcessed') {
+        const { success, message } = e.data;
+        if (success) {
+            // Continúa con el fetch a PHP
+            proceedWithPayment();
+        } else {
+            alert(message);
+        }
+    }
+};
+
+// Agregar al carrito, primero validamos el stock con el worker
 function addToCart(productId, productName, productPrice) {
-    const existingItem = cart.find(item => item.id === productId);
+    // primero, obtenemos el stock actual de BD 
+    fetch('getStock.php?productId=' + productId)
+    .then(response => response.json())
+    .then(stockData => {
+        if (!stockData.success) {
+            showNotification('Error al validar stock');
+            return;
+        }
 
+        stockWorker.postMessage({
+            action: 'validateStock',
+            data: {
+                productId,
+                productName,
+                productPrice,
+                requestedQuantity: 1,
+                availableStock: stockData.stock
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error al consultar stock:', error);
+        showNotification('No se pudo validar el stock');
+    });
+}
+
+//esta funcion solo se llama si el worker valida que hay stock suficiente, para evitar duplicar logica de validacion
+function addToCartInternal(productId, productName, productPrice) {
+    const existingItem = cart.find(item => item.id === productId);
     if (existingItem) {
         existingItem.quantity += 1;
     } else {
@@ -16,7 +66,6 @@ function addToCart(productId, productName, productPrice) {
             quantity: 1
         });
     }
-
     updateCart();
     showNotification(`${productName} agregado al carrito`);
 }
@@ -69,6 +118,24 @@ function removeFromCart(productId) {
 // Toggle carrito
 function toggleCart() {
     document.getElementById("cartSidebar").classList.toggle("active");
+}
+
+// para fetch real
+function proceedWithPayment() {
+    const totalPagar = cart.reduce((sum, it) => sum + it.price * it.quantity, 0);
+
+    fetch('Procesar_pago.php', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: cart, total: totalPagar })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success) {
+            alert(data.message);
+            // Resto del código...
+        }
+    });
 }
 
 // Checkout
