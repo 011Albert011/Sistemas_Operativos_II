@@ -27,8 +27,21 @@ if (!$UsuarioID) {
     mysqli_close($link);
     exit;
 }
+// Validaciones previas
+if (empty($items)) {
+    ob_clean();
+    echo json_encode(['success' => false, 'message' => 'No hay items en la compra.']);
+    mysqli_close($link);
+    exit;
+}
 
-mysqli_begin_transaction($link);
+$PagoTotal = floatval($PagoTotal);
+if ($PagoTotal <= 0) {
+    ob_clean();
+    echo json_encode(['success' => false, 'message' => 'El total de pago debe ser mayor a 0.']);
+    mysqli_close($link);
+    exit;
+}mysqli_begin_transaction($link);
 
 // prepara la consulta para insertar el ticket maestro
 $ticketStmt = mysqli_prepare($link, "INSERT INTO ticket (Id_Usuario, fecha, Total_Pago) VALUES (?, NOW(), ?)");
@@ -118,16 +131,18 @@ if (!$TodoBien) {
     exit;
 }
 
-// confirma la transaccion si todo salio bien
-mysqli_commit($link);
-
+// Intenta crear el ticket DENTRO de la transacción
 $nombre_archivo = Crear_Ticket($items, $PagoTotal);
 if (!$nombre_archivo) {
+    mysqli_rollback($link);
     ob_clean();
     echo json_encode(['success' => false, 'message' => 'Error al crear el archivo físico del Ticket.']);
     mysqli_close($link);
     exit;
 }
+
+// confirma la transaccion si todo salio bien
+mysqli_commit($link);
 
 $Mandar_Correo = enviarTicketPorCorreo($Correo_Usuario, $Nombre_Usuario, $nombre_archivo);
 $soloNombre = basename($nombre_archivo);
@@ -149,3 +164,4 @@ if ($Mandar_Correo) {
 }
 
 mysqli_close($link);
+
