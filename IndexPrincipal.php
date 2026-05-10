@@ -31,6 +31,7 @@
                         <a href="#marcas">Marcas</a>
                         <a href="#financiacion">Financiación</a>
                         <a href="#contacto">Contacto</a>
+                        <a href="process_manager.php">Gestor de Procesos</a>
                         <?php 
                             // Verificamos si existe un ticket en la sesion
                             $urlTicket = isset($_SESSION['ultimo_ticket']) ? $_SESSION['ultimo_ticket'] : '#';
@@ -91,7 +92,6 @@
                         $nombre = $fila['Nombre_C'];
                         $categoria = $fila['Categoria'];
                         $precio = $fila['Precio'];
-                        $Precio = $precio * 0.70;
                         $imagen = $fila['Imagen'];
                         $descripcion = $fila['Descripcion'];
                         $stock = $fila['Stock'];
@@ -101,7 +101,7 @@
                         <div class="product-info">
                             <div class="product-category"><?php echo strtoupper($categoria); ?></div>
                             <div class="product-name"><?php echo $nombre; ?></div>
-                            <div class="product-price" data-precio-real="<?php echo $precio; ?>">$<?php echo number_format($Precio, 2); ?></div>
+                            <div class="product-price" data-precio-real="<?php echo $precio; ?>">$<?php echo number_format($precio, 2); ?></div>
                             <div class="product-description"><?php echo $descripcion; ?></div>
                             <div class="product-inventario">Inventario: <?php echo $stock; ?></div>
                             <button class="add-to-cart-btn" onclick="addToCart(<?php echo $id; ?>, '<?php echo addslashes($nombre); ?>', <?php echo $precio; ?>)">

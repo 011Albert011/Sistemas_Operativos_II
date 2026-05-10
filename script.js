@@ -145,49 +145,30 @@ function checkout() {
         return;
     }
 
+    const burstTime = Math.floor(Math.random() * 10) + 30;
     const totalPagar = cart.reduce((sum, it) => sum + it.price * it.quantity, 0);
-    const PagoT = {
+    const processData = {
+        id: `TICKET_${Date.now()}`,
         items: cart,
-        total: totalPagar
+        total: totalPagar,
+        timestamp: Date.now(),
+        originalBurstTime: burstTime,
+        remainingTime: burstTime,
+        status: 'LISTO'
     };
 
-    fetch('Procesar_pago.php', { 
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(PagoT)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if(data.success) {
-            // 1. Informamos al usuario (Este alert ayuda a que el navegador permita el popup)
-            alert(data.message);
+    // Store process data in localStorage for the process manager (support multiple pending processes)
+    let pendingProcesses = JSON.parse(localStorage.getItem('pendingProcesses') || '[]');
+    pendingProcesses.push(processData);
+    localStorage.setItem('pendingProcesses', JSON.stringify(pendingProcesses));
 
-            // 2. Si el servidor nos envió la ruta del archivo físico
-            if(data.ruta) {
-                // Abrimos nuestro puente 'Imprimir.php' pasando la ruta real del ticket
-                const urlImpresion = 'Imprimir.php?archivo=' + encodeURIComponent(data.ruta);
-                const ventanaImpresion = window.open(urlImpresion, '_blank');
+    // Clear cart immediately (UI feedback)
+    cart = [];
+    updateCart();
+    toggleCart();
 
-                if (!ventanaImpresion) {
-                    alert('Por favor, permite las ventanas emergentes para que el ticket se imprima automáticamente.');
-                }
-            }
-
-            // 3. Limpieza de la interfaz
-            cart = []; 
-            updateCart();
-            toggleCart();
-            
-        } else {
-            alert('Error al procesar: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Hubo un problema con la conexión al servidor.');
-    });
+    // Redirect to process manager
+    window.location.href = 'process_manager.php';
 }
 
 

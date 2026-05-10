@@ -8,6 +8,9 @@ require_once 'Mandar_Correo.php';
 $json = file_get_contents('php://input'); 
 $data = json_decode($json, true);
 
+// Check if this is a post-process completion call
+$processId = $data['processId'] ?? null;
+
 $link = mysqli_connect("localhost", "root", "", "sistemasii");
 if(!$link){
     ob_clean();
@@ -65,12 +68,11 @@ if (!mysqli_stmt_execute($ticketStmt)) {
 $Id_Ticket = mysqli_insert_id($link);
 mysqli_stmt_close($ticketStmt);
 
-// prepara consultas para stock, actualizacion y detalles
-$stockStmt = mysqli_prepare($link, "SELECT Stock FROM carro WHERE Id_Carro = ? LIMIT 1");
+// Solo preparamos los statements que NO devuelven resultado con bind_result
 $updateStockStmt = mysqli_prepare($link, "UPDATE carro SET Stock = ? WHERE Id_Carro = ?");
-$detallesStmt = mysqli_prepare($link, "INSERT INTO detalles_t (Id_Ticket, Id_Carro, Precio_Unitario, Cantidad) VALUES (?, ?, ?, ?)");
+$detallesStmt    = mysqli_prepare($link, "INSERT INTO detalles_t (Id_Ticket, Id_Carro, Precio_Unitario, Cantidad) VALUES (?, ?, ?, ?)");
 
-if (!$stockStmt || !$updateStockStmt || !$detallesStmt) {
+if (!$updateStockStmt || !$detallesStmt) {
     mysqli_rollback($link);
     ob_clean();
     echo json_encode(['success' => false, 'message' => 'Error interno al preparar las consultas.']);
@@ -82,21 +84,27 @@ $TodoBien = true;
 
 foreach ($items as $item) {
     $Id_Producto = intval($item['id'] ?? 0);
-    $Precio = floatval($item['price'] ?? 0);
-    $Cantidad = intval($item['quantity'] ?? 0);
+    $Precio      = floatval($item['price'] ?? 0);
+    $Cantidad    = intval($item['quantity'] ?? 0);
 
     if ($Id_Producto <= 0 || $Cantidad <= 0 || $Precio < 0) {
         $TodoBien = false;
         break;
     }
 
-    // enlaza parametro para consultar stock
+    // ── CAMBIO CLAVE: usamos get_result() en lugar de bind_result ──
+    // Se prepara, ejecuta y libera el statement de stock en cada iteración
+    $stockStmt = mysqli_prepare($link, "SELECT Stock FROM carro WHERE Id_Carro = ? LIMIT 1");
+    if (!$stockStmt) { $TodoBien = false; break; }
+
     mysqli_stmt_bind_param($stockStmt, "i", $Id_Producto);
     mysqli_stmt_execute($stockStmt);
-    // enlaza resultado para obtener stock disponible
-    mysqli_stmt_bind_result($stockStmt, $stockDisponible);
-    mysqli_stmt_fetch($stockStmt);
-    mysqli_stmt_store_result($stockStmt);
+
+    $stockResult     = mysqli_stmt_get_result($stockStmt);  // <-- get_result, no bind_result
+    $stockRow        = mysqli_fetch_assoc($stockResult);
+    $stockDisponible = $stockRow['Stock'] ?? null;
+
+    mysqli_stmt_close($stockStmt);   // <-- cerramos inmediatamente, sin dejar cursores abiertos
 
     if ($stockDisponible === null || $stockDisponible < $Cantidad) {
         $TodoBien = false;
@@ -104,14 +112,12 @@ foreach ($items as $item) {
     }
 
     $nuevoStock = $stockDisponible - $Cantidad;
-    // enlaza parametros para actualizar stock
     mysqli_stmt_bind_param($updateStockStmt, "ii", $nuevoStock, $Id_Producto);
     if (!mysqli_stmt_execute($updateStockStmt)) {
         $TodoBien = false;
         break;
     }
 
-    // enlaza parametros para insertar detalles del ticket
     mysqli_stmt_bind_param($detallesStmt, "iidi", $Id_Ticket, $Id_Producto, $Precio, $Cantidad);
     if (!mysqli_stmt_execute($detallesStmt)) {
         $TodoBien = false;
@@ -119,7 +125,6 @@ foreach ($items as $item) {
     }
 }
 
-mysqli_stmt_close($stockStmt);
 mysqli_stmt_close($updateStockStmt);
 mysqli_stmt_close($detallesStmt);
 
